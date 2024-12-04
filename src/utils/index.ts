@@ -1,0 +1,1 @@
+export { getFontColor } from './colorUtils'
