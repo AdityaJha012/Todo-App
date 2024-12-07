@@ -1,1 +1,1 @@
-export { getFontColor } from './colorUtils'
+export { getFontColor, isDark } from './colorUtils'

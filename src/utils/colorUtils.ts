@@ -25,3 +25,11 @@ export const getFontColor = (backgroundColor: string): string => {
     const threshold = 128;
     return brightness > threshold ? ColorPalette.fontDark : ColorPalette.fontLight;
 }
+
+/**
+ * Determines if the provided color is considered dark based on its brightness.
+ * @param {string} color - The color in hex format
+ */
+export const isDark = (color: string): boolean => {
+    return getFontColor(color) === ColorPalette.fontLight;
+}
