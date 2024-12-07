@@ -1,0 +1,9 @@
+export const TASK_NAME_MAX_LENGTH = 40;
+export const DESCRIPTION_MAX_LENGTH = 350;
+export const DESCRIPTION_SHORT_LENGTH = 100;
+export const USER_NAME_MAX_LENGTH = 14;
+export const PROFILE_PICTURE_MAX_LENGTH = 255;
+export const CATEGORY_NAME_MAX_LENGTH = 20;
+export const MAX_CATEGORIES_IN_TASK = 3;
+export const MAX_COLORS_IN_LIST = 32;
+export const URL_REGEX = /((?:https?):\/\/[^\s/$.?#].[^\s]*)/gi;
