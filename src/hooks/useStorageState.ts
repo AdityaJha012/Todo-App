@@ -34,7 +34,7 @@ export function useStorageState<T>(
         window.addEventListener("storage", handleStorageChange);
 
         return () => {
-            window.addEventListener("storage", handleStorageChange);
+            window.removeEventListener("storage", handleStorageChange);
         };
     });
 

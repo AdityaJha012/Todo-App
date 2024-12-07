@@ -13,7 +13,7 @@ export const useResponsiveDisplay = (breakpoint = 768): boolean => {
         window.addEventListener("resize", handleResize);
 
         return () => {
-            window.addEventListener("resize", handleResize);
+            window.removeEventListener("resize", handleResize);
         };
     }, [breakpoint])
 
