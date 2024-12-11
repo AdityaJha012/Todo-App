@@ -65,19 +65,21 @@ export const CustomDialogTitle = ({
     onClose,
     ...props
 }: CustomDialogTitleProps) => {
-    <DialogTitle {...props}>
-        {onClose && (
-            <CloseButton onClick={onClose} size="small">
-                <CloseRounded />
-            </CloseButton>
-        )}
-        <TitleContainer>
-            {icon && <IconWrapper>{icon}</IconWrapper>}
-            <TextContainer>
-                <Title>{title}</Title>
-                {subTitle && <SubTitle>{subTitle}</SubTitle>}
-            </TextContainer>
-        </TitleContainer>
-        <StyledDivider />
-    </DialogTitle>
+    return (
+        <DialogTitle {...props}>
+            {onClose && (
+                <CloseButton onClick={onClose} size="small">
+                    <CloseRounded />
+                </CloseButton>
+            )}
+            <TitleContainer>
+                {icon && <IconWrapper>{icon}</IconWrapper>}
+                <TextContainer>
+                    <Title>{title}</Title>
+                    {subTitle && <SubTitle>{subTitle}</SubTitle>}
+                </TextContainer>
+            </TitleContainer>
+            <StyledDivider />
+        </DialogTitle>
+    );
 };

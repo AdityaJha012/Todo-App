@@ -4,3 +4,5 @@ export { CustomDialogTitle } from   "./DialogTitle";
 export { EditTask } from "./EditTask";
 export { TaskIcon } from "./TaskIcon";
 export { TaskMenu } from "./tasks/TaskMenu";
+export { CustomEmojiPicker } from "./EmojiPicker";
+export { ColorPicker } from "./ColorPicker";
