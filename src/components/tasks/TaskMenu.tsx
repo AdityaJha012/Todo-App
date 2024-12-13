@@ -14,6 +14,7 @@ import {
     RadioButtonChecked,
     RecordVoiceOver,
     RecordVoiceOverRounded,
+    Style,
 } from "@mui/icons-material";
 import { Divider, IconButton, Menu, MenuItem } from "@mui/material";
 import { Emoji, EmojiStyle } from "emoji-picker-react";
@@ -176,6 +177,265 @@ export const TaskMenu = () => {
     };
 
     const handleDuplicateTask = () => {
-        
+        handleCloseMoreMenu();
+
+        if(selectedTaskId) {
+            if(selectedTask) {
+                // Create a duplicated task with a new ID and current date
+                const duplicatedTask: Task = {
+                    ...selectedTask,
+                    id: generateUUID(),
+                    date: new Date(),
+                    lastSave: undefined
+                };
+
+                // Add the duplicated task to the existing tasks
+                const updatedTasks = [...tasks, duplicatedTask];
+
+                //Update the user object with the updated tasks
+                setUser((prevUser) => ({
+                    ...prevUser,
+                    tasks: updatedTasks
+                }));
+            }
+        }
     };
+
+    const handleReadAloud = () => {
+        const voices = window.speechSynthesis.getVoices();
+        const voice = voices.find((voice) => voice.name === settings.voice);
+        const voiceName = voices.find((voice) => voice.name === settings.voice);
+        const voiceVolume = settings.voiceVolume;
+        const taskName = selectedTask?.name || "";
+        const taskDescription = selectedTask?.description?.replace(/((?:https?):\/\/[^\s/$.?#].[^\s]*)/gi, "") || "";
+
+        // Read task date in voice language
+        const taskDate = new Intl.DateTimeFormat(voice ? voice.lang : navigator.language, {
+            dateStyle: "full",
+            timeStyle: "short",
+        }).format(new Date(selectedTask?.date || ""));
+
+        const taskDeadline = selectedTask?.deadline
+            ?   `. Task Deadline: ${calculateDateDifference(
+                    new Date(selectedTask.deadline),
+                    voice ? voice.lang : navigator.language
+                )}`
+            :   "";
+
+        const textToRead = `${taskName}. ${taskDescription}. Date: ${taskDate}${taskDeadline}`;
+
+        const utterThis: SpeechSynthesisUtterance = new SpeechSynthesisUtterance(textToRead);
+
+        if (voiceName) {
+            utterThis.voice = voiceName;
+        }
+
+        if (voiceVolume) {
+            utterThis.volume = voiceVolume;
+        }
+
+        handleCloseMoreMenu();
+
+        const pauseSpeech = () => {
+            window.speechSynthesis.pause();
+        };
+
+        const resumeSpeech = () => {
+            window.speechSynthesis.resume();
+        };
+
+        const cancelSpeech = () => {
+            window.speechSynthesis.cancel();
+            toast.dismiss(SpeechToastId);
+            handleCloseMoreMenu();
+        };
+
+        const SpeechToastId = toast(
+            () => {
+                const [isPlaying, setIsPlaying] = useState<boolean>(true);
+
+                return (
+                    <ReadAloudContainer>
+                        <ReadAloudHeader translate="yes">
+                            <RecordVoiceOver /> Read aloud: <span translate="no">{selectedTask?.name}</span>
+                        </ReadAloudHeader>
+                        <span translate="yes" style={{ marginTop: "8px", fontSize: "16px" }}>
+                            Voice: <span translate="no">{utterThis.voice?.name || "Default"}</span>
+                        </span>
+                        <div translate="no">
+                            <Marquee delay={0.6} play={isPlaying}>
+                                <p style={{ margin: "6px 0" }}>{utterThis.text} &nbsp;</p>
+                            </Marquee>
+                        </div>
+                        <ReadAloudControls>
+                            {isPlaying ? (
+                                <IconButton
+                                    onClick={() => {
+                                        pauseSpeech();
+                                        setIsPlaying(!isPlaying);
+                                    }}
+                                >
+                                    <Pause fontSize="large" />
+                                </IconButton>
+                            ) : (
+                                <IconButton
+                                    onClick={() => {
+                                        resumeSpeech();
+                                        setIsPlaying(!isPlaying);
+                                    }}
+                                >
+                                    <PlayArrow fontSize="large" />
+                                </IconButton>
+                            )}
+                            <IconButton onClick={cancelSpeech}>
+                                <Cancel fontSize="large" />
+                            </IconButton>
+                        </ReadAloudControls>
+                    </ReadAloudContainer>
+                );
+            },
+            {
+                duration: Infinity,
+                style: {
+                    border: `1px solid ${theme.darkMode ? "#1b1d4eb7" : "ededf7b0"}`,
+                    WebkitBackdropFilter: `blur(${theme.darkMode ? "10" : "14"}px)`,
+                    backdropFilter: `blur(${theme.darkMode ? "10" : "14"}px)`
+                }
+            }
+        );
+
+        // Set up event listener for the end of speech
+        utterThis.onend = () => {
+            // Close the menu
+            handleCloseMoreMenu();
+
+            // Hide the toast when speech ends
+            toast.dismiss(SpeechToastId);
+        };
+
+        if (voiceVolume > 0) {
+            window.speechSynthesis.speak(utterThis);
+        }
+    };
+
+    const menuItems: JSX.Element = (
+        <div>
+            <StyledMenuItem onClick={handleMarkAsDone}>
+                {selectedTask.done ? <Close /> : <Done />}
+                &nbps; {selectedTask.done ? "Mark as not done" : "Mark as done"}
+            </StyledMenuItem>
+            <StyledMenuItem onClick={handlePin}>
+                <PushPinRounded sx={{ textDecoration: "line-through" }} />
+                &nbps; {selectedTask.pinned ? "Unpin" : "Pin"}
+            </StyledMenuItem>
+
+            {multipleSelectedTasks.length === 0 && (
+                <StyledMenuItem onClick={() => handleSelectTask(selectedTaskId || generateUUID())}>
+                    <RadioButtonChecked /> &nbsp; Select
+                </StyledMenuItem>
+            )}
+
+            <StyledMenuItem onClick={redirectToTaskDetails}>
+                <LaunchRounded /> &nbsp; Task Details
+            </StyledMenuItem>
+
+            {settings.enableReadAloud && (
+                <StyledMenuItem
+                    onClick={handleReadAloud}
+                    disabled={window.speechSynthesis.speaking || window.speechSynthesis.pending}
+                >
+                    <RecordVoiceOverRounded /> &nbsp; Read Aloud
+                </StyledMenuItem>
+            )}
+
+            <StyledMenuItem
+                onClick={() => {
+                    setShowShareDialog(true);
+                    handleCloseMoreMenu();
+                }}
+            >
+                <LinkRounded /> &nbsp; Share
+            </StyledMenuItem>
+
+            <Divider />
+
+            <StyledMenuItem
+                onClick={() => {
+                    setEditModalOpen(true);
+                    handleCloseMoreMenu();
+                }}
+            >
+                <EditRounded /> &nbsp; Edit
+            </StyledMenuItem>
+
+            <StyledMenuItem onClick={handleDuplicateTask}>
+                <ContentCopy /> &nbsp; Duplicate
+            </StyledMenuItem>
+
+            <Divider />
+
+            <StyledMenuItem
+                clr={ColorPalette.red}
+                onClick={() => {
+                    handleDeleteTask();
+                    handleCloseMoreMenu();
+                }}
+            >
+                <DeleteRounded /> &nbsp; Delete
+            </StyledMenuItem>
+        </div>
+    );
+
+    return (
+        <>
+            {isMobile ? (
+                <BottomSheet
+                    open={Boolean(anchorEl)}
+                    onDismiss={handleCloseMoreMenu}
+                    snapPoints={({ minHeight, maxHeight }) => [minHeight, maxHeight]}
+                    expandOnContentDrag
+                    header={
+                        <div style={{ cursor: "ns-resize" }}>
+                            <SheetHeader translate="no">
+                                <Emoji emojiStyle={emojisStyle} size={32} unified={selectedTask.emoji || ""} />{" "}
+                                {emojisStyle === EmojiStyle.NATIVE && "\u00A0"}
+                                {selectedTask.name}
+                            </SheetHeader>
+                            <Divider sx={{ mt: "20px", mb: "-20px" }} />
+                        </div>
+                    }
+                >
+                    <SheetContent>{menuItems}</SheetContent>
+                </BottomSheet>
+            ) : (
+                <Menu
+                    id="task-menu"
+                    anchorEl={anchorEl}
+                    anchorPosition={anchorPosition ? anchorPosition : undefined}
+                    anchorReference={anchorPosition ? "anchorPosition" : undefined}
+                    open={Boolean(anchorEl)}
+                    onClose={handleCloseMoreMenu}
+                    sx={{
+                        "& .MuiPaper-root": {
+                            borderRadius: "18px",
+                            minWidth: "200px",
+                            boxShadow: "none",
+                            padding: "6px 4px"
+                        }
+                    }}
+                    MenuListProps={{
+                        "aria-labelledby": "more-button"
+                    }}
+                >
+                    {menuItems}
+                </Menu>
+            )}
+            <ShareDialog 
+                open={showShareDialog}
+                onClose={() => setShowShareDialog(false)}
+                selectedTaskId={selectedTaskId}
+                selectedTask={selectedTask}
+            />
+        </>
+    );
 };
