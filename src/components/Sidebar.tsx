@@ -41,7 +41,13 @@ import logo from "../assets/logo256.png";
 import { defaultUser } from "../constants/defaultUser";
 import { UserContext } from "../contexts/UserContext";
 import { fetchBMCInfo } from "../services/bmcApi";
-import { getchGithubInfo } from "../services/githubApi";
+import { fetchGitHubInfo } from "../services/githubApi";
 import { DialogBtn, UserAvatar, pulseAnimation, ring } from "../styles";
 import { ColorPalette } from "../theme/themeConfig";
 import { showToast, systemInfo, timeAgo } from "../utils";
+
+export const ProfileSidebar = () => {
+    return (
+        <div></div>
+    );
+};

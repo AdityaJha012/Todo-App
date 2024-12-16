@@ -8,3 +8,4 @@ export { CustomEmojiPicker } from "./EmojiPicker";
 export { ColorPicker } from "./ColorPicker";
 export { BottomNav } from './BottomNav';
 export { ProfileSidebar } from './Sidebar';
+export { SettingsDialog } from './Settings';
