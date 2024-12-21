@@ -53,7 +53,7 @@ type MuiDialogTitleProps = ComponentProps<typeof DialogTitle>;
 
 interface CustomDialogTitleProps extends MuiDialogTitleProps {
     title: string;
-    subTitle: string;
+    subTitle?: string;
     icon?: JSX.Element;
     onClose?: () => void;
 }
